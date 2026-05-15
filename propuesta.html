@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<title>JR Automata — Bot de Agendamiento IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:white; color:#0F172A; font-size:11pt; }
+
+  /* PAGE BREAKS */
+  .page { width:210mm; min-height:297mm; padding:14mm 16mm; position:relative; page-break-after:always; overflow:hidden; }
+  .page:last-child { page-break-after:auto; }
+
+  @media print {
+    body { margin:0; }
+    .page { width:210mm; min-height:297mm; padding:14mm 16mm; page-break-after:always; }
+    .no-print { display:none; }
+  }
+
+  /* COLORS */
+  :root {
+    --blue:#2563EB; --blue-dark:#1E3A8A; --teal:#0891B2;
+    --green:#059669; --wa:#25D366; --gray:#64748B; --light:#F1F5F9;
+  }
+
+  /* ===== PAGE 1 — COVER ===== */
+  .cover { background:linear-gradient(145deg,#0F172A 0%,#1E3A8A 55%,#0E7490 100%); color:white; display:flex; flex-direction:column; justify-content:space-between; }
+
+  .cover-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10mm; }
+  .logo-wrap { display:flex; align-items:center; gap:10px; }
+  .logo-wrap img { height:44px; border-radius:8px; background:white; padding:3px; }
+  .logo-text strong { display:block; font-size:13pt; font-weight:800; color:white; }
+  .logo-text span { font-size:7.5pt; color:rgba(255,255,255,0.6); }
+  .cover-date { font-size:8pt; color:rgba(255,255,255,0.5); text-align:right; }
+
+  .cover-hero { flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .cover-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(37,211,102,0.2); border:1px solid rgba(37,211,102,0.4); color:#34D399; padding:5px 14px; border-radius:50px; font-size:8pt; font-weight:700; margin-bottom:8mm; width:fit-content; }
+  .cover-badge span { width:7px; height:7px; background:#34D399; border-radius:50%; display:inline-block; }
+  .cover h1 { font-size:28pt; font-weight:900; line-height:1.15; margin-bottom:5mm; }
+  .cover h1 em { font-style:normal; color:#60A5FA; }
+  .cover-sub { font-size:12pt; color:#CBD5E1; line-height:1.6; max-width:140mm; margin-bottom:10mm; }
+
+  .cover-platforms { display:flex; gap:10px; margin-bottom:10mm; }
+  .platform-tag { display:flex; align-items:center; gap:7px; padding:7px 16px; border-radius:50px; font-size:9pt; font-weight:700; }
+  .platform-wa { background:rgba(37,211,102,0.15); border:1px solid rgba(37,211,102,0.4); color:#34D399; }
+  .platform-tg { background:rgba(34,158,217,0.15); border:1px solid rgba(34,158,217,0.4); color:#7DD3FC; }
+  .platform-tag .badge { background:rgba(255,255,255,0.15); font-size:7pt; padding:2px 8px; border-radius:50px; }
+
+  .cover-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:10mm; }
+  .cover-stat { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:10px 8px; text-align:center; }
+  .cover-stat-num { font-size:18pt; font-weight:900; color:#60A5FA; display:block; }
+  .cover-stat-label { font-size:7pt; color:rgba(255,255,255,0.6); margin-top:2px; }
+
+  .cover-bottom { border-top:1px solid rgba(255,255,255,0.12); padding-top:5mm; display:flex; justify-content:space-between; align-items:center; }
+  .cover-contact { font-size:8pt; color:rgba(255,255,255,0.6); }
+  .cover-contact strong { color:white; display:block; margin-bottom:2px; }
+  .cover-contact a { color:#60A5FA; text-decoration:none; }
+  .cover-page-num { font-size:8pt; color:rgba(255,255,255,0.3); }
+
+  /* ===== PAGE 2 — PROBLEMA + COMO FUNCIONA ===== */
+  .page-header { display:flex; align-items:center; justify-content:space-between; padding-bottom:5mm; border-bottom:2px solid var(--light); margin-bottom:7mm; }
+  .page-header-logo { display:flex; align-items:center; gap:8px; }
+  .page-header-logo img { height:28px; border-radius:6px; }
+  .page-header-logo span { font-size:9pt; font-weight:700; color:#0F172A; }
+  .page-num { font-size:8pt; color:var(--gray); }
+
+  .section-label { display:inline-block; background:#DBEAFE; color:#2563EB; font-size:7.5pt; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:3px 10px; border-radius:50px; margin-bottom:4mm; }
+  .section-title { font-size:16pt; font-weight:900; color:#0F172A; margin-bottom:3mm; line-height:1.2; }
+  .section-sub { font-size:10pt; color:var(--gray); line-height:1.6; margin-bottom:6mm; }
+
+  /* PAIN CARDS */
+  .pain-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:8mm; }
+  .pain-card { background:#FEF2F2; border:1px solid #FECACA; border-radius:10px; padding:10px 12px; }
+  .pain-card .icon { font-size:16pt; margin-bottom:4px; }
+  .pain-card h4 { font-size:9pt; font-weight:700; color:#991B1B; margin-bottom:4px; }
+  .pain-card p { font-size:8pt; color:#B91C1C; line-height:1.5; }
+
+  /* HOW IT WORKS */
+  .steps-row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:8mm; position:relative; }
+  .steps-row::before { content:''; position:absolute; top:18px; left:10%; right:10%; height:1.5px; background:linear-gradient(90deg,#2563EB,#0891B2); z-index:0; }
+  .step-box { text-align:center; position:relative; z-index:1; }
+  .step-circle { width:36px; height:36px; background:linear-gradient(135deg,#2563EB,#0891B2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13pt; margin:0 auto 6px; box-shadow:0 4px 12px rgba(37,99,235,0.3); }
+  .step-box h4 { font-size:8.5pt; font-weight:700; color:#0F172A; margin-bottom:3px; }
+  .step-box p { font-size:7.5pt; color:var(--gray); line-height:1.4; }
+
+  /* CHAT SCREENSHOT */
+  .chat-demo { background:#ECE5DD; border-radius:12px; overflow:hidden; border:1px solid #ddd; }
+  .chat-demo-header { background:linear-gradient(135deg,#075E54,#128C7E); padding:8px 12px; display:flex; align-items:center; gap:8px; }
+  .chat-demo-avatar { width:28px; height:28px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11pt; flex-shrink:0; }
+  .chat-demo-info h5 { color:white; font-size:8.5pt; font-weight:700; }
+  .chat-demo-info p { color:rgba(255,255,255,0.7); font-size:7pt; }
+  .chat-demo-dot { margin-left:auto; width:7px; height:7px; background:#34D399; border-radius:50%; }
+  .chat-msgs { padding:8px; display:flex; flex-direction:column; gap:5px; }
+  .cmsg { max-width:80%; padding:6px 10px; border-radius:10px; font-size:8pt; line-height:1.4; }
+  .cmsg.bot { background:white; align-self:flex-start; border-bottom-left-radius:2px; }
+  .cmsg.user { background:#DCF8C6; align-self:flex-end; border-bottom-right-radius:2px; }
+  .cmsg-time { font-size:6.5pt; color:#999; text-align:right; margin-top:2px; }
+
+  /* ===== PAGE 3 — FEATURES + PRICING + CTA ===== */
+  .features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:8mm; }
+  .feat { background:var(--light); border-radius:10px; padding:10px 12px; border-left:3px solid var(--blue); }
+  .feat .icon { font-size:14pt; margin-bottom:4px; }
+  .feat h4 { font-size:9pt; font-weight:700; color:#0F172A; margin-bottom:3px; }
+  .feat p { font-size:7.5pt; color:var(--gray); line-height:1.4; }
+
+  /* PRICING */
+  .pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:8mm; }
+  .price-card { border:2px solid #E2E8F0; border-radius:14px; padding:14px 12px; text-align:center; position:relative; }
+  .price-card.featured { border-color:var(--blue); background:linear-gradient(180deg,#EFF6FF,white); }
+  .price-badge { position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--blue); color:white; font-size:7pt; font-weight:700; padding:3px 12px; border-radius:50px; white-space:nowrap; }
+  .price-name { font-size:10pt; font-weight:800; color:#0F172A; margin-bottom:2px; margin-top:4px; }
+  .price-amount { font-size:22pt; font-weight:900; color:var(--blue); line-height:1.1; }
+  .price-amount span { font-size:10pt; font-weight:600; }
+  .price-period { font-size:8pt; color:var(--gray); margin-bottom:8px; }
+  .price-features { list-style:none; text-align:left; margin-bottom:8px; }
+  .price-features li { font-size:8pt; color:#334155; padding:3px 0; display:flex; gap:6px; align-items:flex-start; }
+  .price-features li::before { content:'✓'; color:var(--green); font-weight:800; flex-shrink:0; }
+  .price-note { font-size:7pt; color:var(--gray); font-style:italic; }
+
+  /* COMPARISON TABLE */
+  .comp-table { width:100%; border-collapse:collapse; margin-bottom:8mm; font-size:8.5pt; }
+  .comp-table th { background:#0F172A; color:white; padding:8px 12px; text-align:left; font-weight:700; }
+  .comp-table th:nth-child(2) { background:#1E3A8A; text-align:center; color:#93C5FD; }
+  .comp-table th:nth-child(3) { text-align:center; color:#94A3B8; }
+  .comp-table td { padding:7px 12px; border-bottom:1px solid #F1F5F9; }
+  .comp-table td:nth-child(2) { text-align:center; color:var(--green); font-weight:600; }
+  .comp-table td:nth-child(3) { text-align:center; color:#EF4444; }
+  .comp-table tr:nth-child(even) { background:#F8FAFF; }
+
+  /* CTA BOX */
+  .cta-box { background:linear-gradient(135deg,#1E3A8A,#0E7490); border-radius:16px; padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+  .cta-text h3 { color:white; font-size:13pt; font-weight:900; margin-bottom:4px; }
+  .cta-text p { color:rgba(255,255,255,0.75); font-size:8.5pt; line-height:1.5; }
+  .cta-right { display:flex; flex-direction:column; align-items:center; gap:8px; flex-shrink:0; }
+  .cta-wa { background:var(--wa); color:white; padding:10px 20px; border-radius:50px; font-weight:800; font-size:9.5pt; text-decoration:none; display:flex; align-items:center; gap:8px; white-space:nowrap; }
+  .cta-qr { text-align:center; }
+  .cta-qr img { width:70px; height:70px; border-radius:8px; border:2px solid white; }
+  .cta-qr p { font-size:6.5pt; color:rgba(255,255,255,0.6); margin-top:3px; }
+
+  /* RETO */
+  .reto-box { background:#F0FDF4; border:2px solid #86EFAC; border-radius:12px; padding:12px 16px; margin-bottom:6mm; }
+  .reto-box h4 { font-size:11pt; font-weight:900; color:#166534; margin-bottom:4px; }
+  .reto-box p { font-size:9pt; color:#15803D; line-height:1.5; }
+
+  /* PRINT BUTTON */
+  .print-btn { position:fixed; bottom:24px; right:24px; background:#2563EB; color:white; border:none; padding:12px 24px; border-radius:50px; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 8px 20px rgba(37,99,235,0.4); z-index:1000; }
+  .print-btn:hover { background:#1E40AF; }
+</style>
+</head>
+<body>
+
+<!-- PRINT BUTTON -->
+<button class="print-btn no-print" onclick="window.print()">🖨️ Guardar como PDF</button>
+
+<!-- ============================= PAGE 1 — COVER ============================= -->
+<div class="page cover">
+  <div class="cover-top">
+    <div class="logo-wrap">
+      <img src="img/logo.jpg" alt="JR Automata"/>
+      <div class="logo-text">
+        <strong>JR Automata</strong>
+        <span>Inteligencia Administrativa & Automatización</span>
+      </div>
+    </div>
+    <div class="cover-date">Mayo 2026 · Guayaquil, Ecuador</div>
+  </div>
+
+  <div class="cover-hero">
+    <div class="cover-badge"><span></span> Bot activo · Demo disponible ahora</div>
+    <h1>Bot de Agendamiento<br>con <em>Inteligencia Artificial</em></h1>
+    <p class="cover-sub">Tu negocio responde, agenda y gestiona citas por WhatsApp automáticamente — sin recepcionista, sin errores, las 24 horas.</p>
+
+    <div class="cover-platforms">
+      <div class="platform-tag platform-wa">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp <span class="badge">PRINCIPAL</span>
+      </div>
+      <div class="platform-tag platform-tg">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        Telegram <span class="badge">Demo disponible</span>
+      </div>
+    </div>
+
+    <div class="cover-stats">
+      <div class="cover-stat"><span class="cover-stat-num">24/7</span><div class="cover-stat-label">Siempre activo</div></div>
+      <div class="cover-stat"><span class="cover-stat-num">&lt;3s</span><div class="cover-stat-label">Tiempo respuesta</div></div>
+      <div class="cover-stat"><span class="cover-stat-num">0</span><div class="cover-stat-label">Citas duplicadas</div></div>
+      <div class="cover-stat"><span class="cover-stat-num">100%</span><div class="cover-stat-label">Automatizado</div></div>
+    </div>
+
+    <!-- PARA QUIEN -->
+    <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:10px 14px;">
+      <p style="font-size:8pt;color:rgba(255,255,255,0.5);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Ideal para</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <span style="background:rgba(255,255,255,0.1);color:white;font-size:8pt;padding:4px 12px;border-radius:50px;">🦷 Clínicas dentales</span>
+        <span style="background:rgba(255,255,255,0.1);color:white;font-size:8pt;padding:4px 12px;border-radius:50px;">🩺 Consultorios médicos</span>
+        <span style="background:rgba(255,255,255,0.1);color:white;font-size:8pt;padding:4px 12px;border-radius:50px;">🧠 Psicólogos</span>
+        <span style="background:rgba(255,255,255,0.1);color:white;font-size:8pt;padding:4px 12px;border-radius:50px;">🐾 Veterinarias</span>
+        <span style="background:rgba(255,255,255,0.1);color:white;font-size:8pt;padding:4px 12px;border-radius:50px;">💆 Spas & estéticas</span>
+        <span style="background:rgba(255,255,255,0.1);color:white;font-size:8pt;padding:4px 12px;border-radius:50px;">💇 Peluquerías</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-bottom">
+    <div class="cover-contact">
+      <strong>Jostin Rendón · JR Automata</strong>
+      <a href="https://wa.me/593986456791">+593 986 456 791 (WhatsApp)</a> · alejorendon2712@gmail.com
+    </div>
+    <div class="cover-page-num">1 / 3</div>
+  </div>
+</div>
+
+<!-- ============================= PAGE 2 — PROBLEMA + CÓMO FUNCIONA ============================= -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-logo">
+      <img src="img/logo.jpg" alt="JR Automata"/>
+      <span>JR Automata · Bot de Agendamiento IA</span>
+    </div>
+    <div class="page-num">2 / 3</div>
+  </div>
+
+  <!-- PROBLEMA -->
+  <div class="section-label">El problema</div>
+  <h2 class="section-title">¿Cuántos clientes pierdes por no responder a tiempo?</h2>
+  <p class="section-sub">Cada mensaje sin respuesta es una cita que se va a la competencia. Especialmente fuera del horario de atención.</p>
+
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="icon">😴</div>
+      <h4>Sin respuesta de noche</h4>
+      <p>El cliente escribe a las 9 PM. Nadie responde. Al día siguiente ya agendó en otro lugar.</p>
+    </div>
+    <div class="pain-card">
+      <div class="icon">📱</div>
+      <h4>Equipo saturado</h4>
+      <p>Horas respondiendo lo mismo: horarios, precios, disponibilidad — tiempo que se pierde.</p>
+    </div>
+    <div class="pain-card">
+      <div class="icon">📋</div>
+      <h4>Agenda desorganizada</h4>
+      <p>Citas en papel, WhatsApp y calendario al mismo tiempo. Errores y solapamientos.</p>
+    </div>
+  </div>
+
+  <!-- COMO FUNCIONA -->
+  <div class="section-label">Cómo funciona</div>
+  <h2 class="section-title">4 pasos, todo automático</h2>
+  <p class="section-sub" style="margin-bottom:8mm;">El cliente escribe como siempre. El bot hace el resto.</p>
+
+  <div class="steps-row">
+    <div class="step-box">
+      <div class="step-circle">💬</div>
+      <h4>Cliente escribe</h4>
+      <p>Manda un mensaje por WhatsApp o Telegram a cualquier hora</p>
+    </div>
+    <div class="step-box">
+      <div class="step-circle">🧠</div>
+      <h4>IA responde</h4>
+      <p>El bot consulta disponibilidad y conversa de forma natural</p>
+    </div>
+    <div class="step-box">
+      <div class="step-circle">📅</div>
+      <h4>Cita agendada</h4>
+      <p>Se crea en Google Calendar y se registra en tu base de datos</p>
+    </div>
+    <div class="step-box">
+      <div class="step-circle">🔔</div>
+      <h4>Tú recibes aviso</h4>
+      <p>Notificación inmediata en tu WhatsApp con los datos del cliente</p>
+    </div>
+  </div>
+
+  <!-- CHAT DEMO -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6mm;">
+    <div>
+      <p style="font-size:8.5pt;font-weight:700;color:#0F172A;margin-bottom:4px;">💬 Conversación real con el bot:</p>
+      <div class="chat-demo">
+        <div class="chat-demo-header">
+          <div class="chat-demo-avatar">🦷</div>
+          <div class="chat-demo-info"><h5>Dentaklin Bot</h5><p>En línea · responde en &lt;3 seg</p></div>
+          <div class="chat-demo-dot"></div>
+        </div>
+        <div class="chat-msgs">
+          <div class="cmsg bot">¡Hola! 😊 ¿En qué te ayudo hoy?<div class="cmsg-time">09:00 ✓✓</div></div>
+          <div class="cmsg user">Quiero agendar una cita<div class="cmsg-time">09:01 ✓✓</div></div>
+          <div class="cmsg bot">¡Perfecto! 🗓️ Disponibilidad hoy:<br>· 10:00 · 10:30 · 14:00 · 15:30<br>¿Cuál te conviene?<div class="cmsg-time">09:01 ✓✓</div></div>
+          <div class="cmsg user">A las 10:30<div class="cmsg-time">09:01 ✓✓</div></div>
+          <div class="cmsg bot">✅ ¡Listo! Cita a las 10:30. ¡Te esperamos! 📅<div class="cmsg-time">09:02 ✓✓</div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p style="font-size:8.5pt;font-weight:700;color:#0F172A;margin-bottom:4px;">📊 Lo que ves tú como dueño:</p>
+      <img src="img/sheets.jpg" alt="CRM Sheets" style="width:100%;border-radius:10px;border:1px solid #E2E8F0;"/>
+      <p style="font-size:7pt;color:var(--gray);margin-top:4px;text-align:center;">Cada cita registrada automáticamente en Google Sheets</p>
+    </div>
+  </div>
+
+  <div style="background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:center;">
+    <span style="font-size:18pt;">📅</span>
+    <div>
+      <p style="font-size:8.5pt;font-weight:700;color:#0C4A6E;margin-bottom:2px;">Google Calendar sincronizado al instante</p>
+      <p style="font-size:8pt;color:#0369A1;">Cada cita aparece en tu calendario con nombre, teléfono, tratamiento y canal — sin que toques nada.</p>
+    </div>
+    <img src="img/calendar.jpg" alt="Calendar" style="height:60px;border-radius:8px;border:1px solid #BAE6FD;flex-shrink:0;"/>
+  </div>
+</div>
+
+<!-- ============================= PAGE 3 — FEATURES + PRICING + CTA ============================= -->
+<div class="page">
+  <div class="page-header">
+    <div class="page-header-logo">
+      <img src="img/logo.jpg" alt="JR Automata"/>
+      <span>JR Automata · Bot de Agendamiento IA</span>
+    </div>
+    <div class="page-num">3 / 3</div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section-label">Qué incluye</div>
+  <h2 class="section-title" style="margin-bottom:5mm;">Todo lo que hace el sistema</h2>
+
+  <div class="features-grid">
+    <div class="feat">
+      <div class="icon">🤖</div>
+      <h4>IA Conversacional</h4>
+      <p>Entiende lenguaje natural. Responde como una persona real, con empatía y contexto.</p>
+    </div>
+    <div class="feat">
+      <div class="icon">🗓️</div>
+      <h4>Google Calendar</h4>
+      <p>Cada cita se registra automáticamente con todos los datos del paciente.</p>
+    </div>
+    <div class="feat">
+      <div class="icon">✅</div>
+      <h4>Anti-Duplicados</h4>
+      <p>Detecta si el cliente ya tiene cita activa y ofrece reagendar en lugar de duplicar.</p>
+    </div>
+    <div class="feat">
+      <div class="icon">📊</div>
+      <h4>CRM en Sheets</h4>
+      <p>Base de datos completa de clientes: nombre, teléfono, tratamiento, estado y fechas.</p>
+    </div>
+    <div class="feat">
+      <div class="icon">🔔</div>
+      <h4>Notificaciones</h4>
+      <p>Recibes un mensaje al instante cada vez que se agenda una nueva cita.</p>
+    </div>
+    <div class="feat">
+      <div class="icon">🔄</div>
+      <h4>Reagendar / Cancelar</h4>
+      <p>El cliente puede gestionar su cita solo. Todo se actualiza automáticamente.</p>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section-label">Inversión</div>
+  <h2 class="section-title" style="margin-bottom:5mm;">Planes disponibles</h2>
+
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-name">Básico</div>
+      <div class="price-amount">$<span style="font-size:14pt;">199</span></div>
+      <div class="price-period">pago único · implementación</div>
+      <ul class="price-features">
+        <li>Bot en Telegram o WhatsApp</li>
+        <li>Google Calendar integrado</li>
+        <li>CRM en Google Sheets</li>
+        <li>Notificaciones al dueño</li>
+        <li>1 mes de soporte incluido</li>
+      </ul>
+      <p class="price-note">Ideal para empezar</p>
+    </div>
+    <div class="price-card featured">
+      <div class="price-badge">⭐ Más elegido</div>
+      <div class="price-name">Completo</div>
+      <div class="price-amount">$<span style="font-size:14pt;">299</span></div>
+      <div class="price-period">pago único · todo incluido</div>
+      <ul class="price-features">
+        <li>Todo lo del plan Básico</li>
+        <li>WhatsApp + Telegram</li>
+        <li>Reagendamiento y cancelación</li>
+        <li>Anti-duplicados avanzado</li>
+        <li>3 meses de soporte incluido</li>
+        <li>Personalización de respuestas</li>
+      </ul>
+      <p class="price-note">Configuración en &lt; 24 horas</p>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Mantenimiento</div>
+      <div class="price-amount">$<span style="font-size:14pt;">35</span></div>
+      <div class="price-period">por mes · opcional</div>
+      <ul class="price-features">
+        <li>Soporte técnico continuo</li>
+        <li>Actualizaciones del bot</li>
+        <li>Ajustes y mejoras</li>
+        <li>Respuesta en &lt; 24 hrs</li>
+        <li>Disponible desde el mes 2</li>
+      </ul>
+      <p class="price-note">Sin contrato mínimo</p>
+    </div>
+  </div>
+
+  <!-- RETO -->
+  <div class="reto-box">
+    <h4>🎯 El Reto de las 24 Horas</h4>
+    <p>Cuéntanos cómo gestionas tus citas hoy. En menos de 24 horas te decimos exactamente cómo lo automatizamos, cuánto tiempo ahorras y qué costaría. <strong>Sin costo, sin compromiso.</strong></p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <div class="cta-text">
+      <h3>¿Listo para automatizar tu negocio?</h3>
+      <p>Escríbenos por WhatsApp ahora mismo.<br>Configuramos tu bot en menos de 24 horas.</p>
+      <p style="margin-top:6px;font-size:8pt;color:rgba(255,255,255,0.5);">alejorendon2712@gmail.com · Guayaquil, Ecuador</p>
+    </div>
+    <div class="cta-right">
+      <a class="cta-wa" href="https://wa.me/593986456791?text=Hola%20Jostin%2C%20vi%20tu%20propuesta%20del%20bot%20de%20agendamiento%20y%20me%20interesa">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        +593 986 456 791
+      </a>
+      <div class="cta-qr">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=70x70&data=https://wa.me/593986456791&bgcolor=1E3A8A&color=ffffff&qzone=1" alt="QR WhatsApp"/>
+        <p>Escanea para escribirnos</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:5mm;padding-top:4mm;border-top:1px solid #E2E8F0;">
+    <p style="font-size:7.5pt;color:#94A3B8;">JR Automata · Inteligencia Administrativa & Automatización · © 2026 · jr-portfolio-theta.vercel.app</p>
+  </div>
+</div>
+
+</body>
+</html>
