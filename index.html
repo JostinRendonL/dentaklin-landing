@@ -215,14 +215,32 @@
   @keyframes bounceIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   .float-wa:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(37,211,102,0.5); background: var(--wa-dark); }
 
+  /* RESPONSIVE GRIDS — extraídos de inline styles para poder sobreescribir en mobile */
+  .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;align-items:start}
+  .timeline-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:50px;margin-bottom:60px}
+  .timeline-connector{position:absolute;top:24px;left:48px;right:-20px;height:2px;background:linear-gradient(90deg,#2563EB,rgba(37,99,235,0.2))}
+  .checklist-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px 40px}
+  .checklist-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
   /* MOBILE */
   @media(max-width:900px){
     .hero-grid{grid-template-columns:1fr}.phone-wrap{display:none}
     .pain-grid,.features-grid,.test-grid,.demo-steps,.screens-grid,.chat-screens{grid-template-columns:1fr}
     .steps{flex-direction:column;gap:28px}.steps::before{display:none}
     .stats-inner{grid-template-columns:repeat(2,1fr)}
-    .compare-head div,.compare-row div{padding:10px 14px;font-size:0.8rem}
+    .compare-head div,.compare-row div{padding:10px 12px;font-size:0.78rem}
     nav .nav-wa{display:none}
+    /* Pricing: 1 columna, quitar escala del plan destacado */
+    .pricing-grid{grid-template-columns:1fr}
+    .pricing-grid>div:nth-child(2){transform:none!important;margin-top:0!important}
+    /* Timeline: 1 columna, ocultar líneas conectoras (evitan el overflow horizontal) */
+    .timeline-grid{grid-template-columns:1fr;gap:20px;margin-bottom:32px}
+    .timeline-connector{display:none}
+    /* Checklist: 1 columna, menos padding */
+    .checklist-grid{grid-template-columns:1fr}
+    .checklist-box{padding:24px 20px}
+    /* Float WA: más pequeño y pegado al borde */
+    .float-wa{padding:10px 14px;font-size:0.82rem;bottom:16px;right:16px}
   }
 </style>
 </head>
@@ -590,7 +608,7 @@
     <h2 class="section-title">Planes y precios</h2>
     <p class="section-sub">Sin mensualidades obligatorias ni contratos. Pagas una vez y el bot es tuyo.</p>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;align-items:start;">
+    <div class="pricing-grid">
 
       <!-- BASICO -->
       <div style="background:white;border:2px solid #E2E8F0;border-radius:24px;padding:32px 28px;transition:all .3s;" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">
@@ -718,11 +736,11 @@
     <p class="section-sub" style="color:var(--gray-400);">7 días hábiles, sin tecnicismos. Tú nos das la información — nosotros hacemos todo lo demás.</p>
 
     <!-- TIMELINE -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:50px;margin-bottom:60px;">
+    <div class="timeline-grid">
 
       <div style="position:relative;">
         <div style="background:linear-gradient(135deg,#2563EB,#0891B2);width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:white;font-size:1.1rem;margin-bottom:16px;">1</div>
-        <div style="position:absolute;top:24px;left:48px;right:-20px;height:2px;background:linear-gradient(90deg,#2563EB,rgba(37,99,235,0.2));"></div>
+        <div class="timeline-connector"></div>
         <h3 style="color:white;font-size:1rem;font-weight:700;margin-bottom:8px;">Consulta inicial</h3>
         <p style="color:var(--gray-400);font-size:0.85rem;line-height:1.6;">Nos cuentas cómo funciona tu negocio hoy. Analizamos y confirmamos qué necesitas.</p>
         <span style="display:inline-block;margin-top:10px;background:rgba(37,99,235,0.2);color:#93C5FD;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:50px;">Día 1</span>
@@ -730,7 +748,7 @@
 
       <div style="position:relative;">
         <div style="background:linear-gradient(135deg,#2563EB,#0891B2);width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:white;font-size:1.1rem;margin-bottom:16px;">2</div>
-        <div style="position:absolute;top:24px;left:48px;right:-20px;height:2px;background:linear-gradient(90deg,#2563EB,rgba(37,99,235,0.2));"></div>
+        <div class="timeline-connector"></div>
         <h3 style="color:white;font-size:1rem;font-weight:700;margin-bottom:8px;">Recopilación de info</h3>
         <p style="color:var(--gray-400);font-size:0.85rem;line-height:1.6;">Nos envías los datos de tu negocio: horarios, servicios, precios y lo que el bot debe saber.</p>
         <span style="display:inline-block;margin-top:10px;background:rgba(37,99,235,0.2);color:#93C5FD;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:50px;">Días 2-3</span>
@@ -738,7 +756,7 @@
 
       <div style="position:relative;">
         <div style="background:linear-gradient(135deg,#2563EB,#0891B2);width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:white;font-size:1.1rem;margin-bottom:16px;">3</div>
-        <div style="position:absolute;top:24px;left:48px;right:-20px;height:2px;background:linear-gradient(90deg,#2563EB,rgba(37,99,235,0.2));"></div>
+        <div class="timeline-connector"></div>
         <h3 style="color:white;font-size:1rem;font-weight:700;margin-bottom:8px;">Configuración y pruebas</h3>
         <p style="color:var(--gray-400);font-size:0.85rem;line-height:1.6;">Construimos y personalizamos tu bot. Probamos cada escenario antes de entregarlo.</p>
         <span style="display:inline-block;margin-top:10px;background:rgba(37,99,235,0.2);color:#93C5FD;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:50px;">Días 4-6</span>
@@ -754,11 +772,11 @@
     </div>
 
     <!-- CHECKLIST -->
-    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:36px 40px;">
+    <div class="checklist-box">
       <h3 style="color:white;font-size:1.2rem;font-weight:800;margin-bottom:6px;">📋 ¿Qué necesitamos de ti?</h3>
       <p style="color:var(--gray-400);font-size:0.9rem;margin-bottom:28px;">Solo esto — nosotros hacemos el resto:</p>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="checklist-grid">
 
         <div style="display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.04);border-radius:14px;padding:16px;">
           <span style="font-size:1.4rem;flex-shrink:0;">🏥</span>
