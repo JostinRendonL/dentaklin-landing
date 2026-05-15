@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dentaklin AI — Asistente para WhatsApp y Telegram · Clínicas Dentales</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --blue: #2563EB; --blue-dark: #1E40AF; --blue-light: #DBEAFE;
+    --teal: #0891B2; --green: #059669; --purple: #7C3AED;
+    --wa: #25D366; --wa-dark: #1da851;
+    --gray-900: #0F172A; --gray-800: #1E293B; --gray-600: #475569;
+    --gray-400: #94A3B8; --gray-100: #F1F5F9; --white: #FFFFFF;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--gray-900); overflow-x: hidden; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(255,255,255,0.93); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(37,99,235,0.1);
+    padding: 0 5%; display: flex; align-items: center; justify-content: space-between; height: 68px;
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.3rem; color: var(--blue); text-decoration: none; }
+  .nav-logo span { color: var(--gray-900); }
+  .nav-links { display: flex; gap: 8px; align-items: center; }
+  .nav-wa { display: flex; align-items: center; gap: 8px; background: var(--wa); color: white; padding: 9px 18px; border-radius: 50px; font-weight: 600; font-size: 0.85rem; text-decoration: none; transition: all .2s; }
+  .nav-wa:hover { background: var(--wa-dark); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,211,102,0.35); }
+  .nav-cta { background: #229ED9; color: white; border: none; padding: 9px 20px; border-radius: 50px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all .2s; text-decoration: none; display:flex; align-items:center; gap:6px; }
+  .nav-cta:hover { background: #1a8abf; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(34,158,217,0.3); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 55%, #0E7490 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 100px 5% 60px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(37,99,235,0.3) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(8,145,178,0.2) 0%, transparent 50%);
+  }
+  .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; max-width: 1200px; width: 100%; position: relative; z-index: 1; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(37,99,235,0.25); border: 1px solid rgba(37,99,235,0.5); color: #93C5FD; padding: 6px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; margin-bottom: 24px; }
+  .hero-badge .dot { width: 8px; height: 8px; background: #34D399; border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.3)} }
+  .hero h1 { font-size: clamp(2.2rem, 4vw, 3.4rem); font-weight: 900; color: white; line-height: 1.15; margin-bottom: 20px; }
+  .hero h1 em { font-style: normal; color: #60A5FA; }
+  .hero p { font-size: 1.1rem; color: #CBD5E1; line-height: 1.7; margin-bottom: 36px; }
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-tg { background: #229ED9; color: white; padding: 15px 28px; border-radius: 50px; font-weight: 700; font-size: 0.95rem; cursor: pointer; border: none; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 9px; }
+  .btn-tg:hover { background: #1a8abf; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(34,158,217,0.4); }
+  .btn-scroll { background: transparent; color: white; padding: 15px 28px; border-radius: 50px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: 2px solid rgba(255,255,255,0.35); transition: all .2s; text-decoration: none; }
+  .btn-scroll:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+  /* PHONE MOCKUP */
+  .phone-wrap { display: flex; justify-content: center; align-items: center; }
+  .phone { width: 300px; background: #1a1a2e; border-radius: 40px; padding: 16px; box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.08); }
+  .phone-screen { background: #0A0A0A; border-radius: 28px; overflow: hidden; }
+  .phone-header { background: linear-gradient(135deg, #075E54, #128C7E); padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+  .phone-avatar { width: 38px; height: 38px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .phone-info h4 { color: white; font-size: 0.88rem; font-weight: 700; }
+  .phone-info p { color: rgba(255,255,255,0.7); font-size: 0.7rem; }
+  .phone-status { margin-left: auto; width: 8px; height: 8px; background: #34D399; border-radius: 50%; }
+  .chat-body { background: #ECE5DD; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-height: 360px; }
+  .msg { max-width: 85%; padding: 8px 12px; border-radius: 12px; font-size: 0.76rem; line-height: 1.5; animation: fadeUp 0.5s ease forwards; opacity: 0; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .msg.bot { background: white; align-self: flex-start; border-bottom-left-radius: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+  .msg.user { background: #DCF8C6; align-self: flex-end; border-bottom-right-radius: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+  .msg-time { font-size: 0.58rem; color: #999; margin-top: 2px; text-align: right; }
+  .msg:nth-child(1){animation-delay:.2s}.msg:nth-child(2){animation-delay:.8s}.msg:nth-child(3){animation-delay:1.4s}.msg:nth-child(4){animation-delay:2s}.msg:nth-child(5){animation-delay:2.6s}.msg:nth-child(6){animation-delay:3.2s}
+
+  /* STATS */
+  .stats { background: white; padding: 36px 5%; border-bottom: 1px solid var(--gray-100); }
+  .stats-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; text-align: center; }
+  .stat-num { font-size: 2.2rem; font-weight: 900; color: var(--blue); }
+  .stat-label { font-size: 0.82rem; color: var(--gray-600); margin-top: 4px; }
+
+  /* SECTION BASE */
+  section { padding: 90px 5%; }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+  .tag { display: inline-block; background: var(--blue-light); color: var(--blue); padding: 5px 14px; border-radius: 50px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; }
+  .section-title { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 900; color: var(--gray-900); margin-bottom: 14px; }
+  .section-sub { font-size: 1rem; color: var(--gray-600); max-width: 560px; line-height: 1.7; }
+
+  /* PAIN */
+  .pain { background: var(--gray-900); }
+  .pain .section-title { color: white; }
+  .pain .section-sub { color: var(--gray-400); }
+  .pain-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-top: 48px; }
+  .pain-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 26px; transition: all .3s; }
+  .pain-card:hover { background: rgba(255,255,255,0.09); transform: translateY(-4px); }
+  .pain-icon { font-size: 2rem; margin-bottom: 14px; }
+  .pain-card h3 { color: white; font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .pain-card p { color: var(--gray-400); font-size: 0.87rem; line-height: 1.6; }
+  .badge-bad { display: inline-block; background: rgba(239,68,68,0.15); color: #FCA5A5; font-size: 0.73rem; padding: 3px 10px; border-radius: 50px; margin-top: 12px; }
+
+  /* FEATURES */
+  .features { background: linear-gradient(180deg, #F8FAFF 0%, white 100%); }
+  .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 26px; margin-top: 48px; }
+  .feat-card { background: white; border: 1px solid #E2E8F0; border-radius: 20px; padding: 28px; transition: all .3s; position: relative; overflow: hidden; }
+  .feat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue), var(--teal)); }
+  .feat-card:hover { box-shadow: 0 20px 40px rgba(37,99,235,0.1); transform: translateY(-4px); border-color: #BFDBFE; }
+  .feat-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px; }
+  .feat-icon.blue{background:#DBEAFE}.feat-icon.teal{background:#CFFAFE}.feat-icon.green{background:#D1FAE5}.feat-icon.purple{background:#EDE9FE}.feat-icon.orange{background:#FEF3C7}.feat-icon.pink{background:#FCE7F3}
+  .feat-card h3 { font-size: 1rem; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+  .feat-card p { font-size: 0.86rem; color: var(--gray-600); line-height: 1.6; }
+
+  /* HOW */
+  .how { background: white; }
+  .steps { display: flex; gap: 0; margin-top: 60px; position: relative; }
+  .steps::before { content: ''; position: absolute; top: 36px; left: 10%; right: 10%; height: 2px; background: linear-gradient(90deg, var(--blue), var(--teal)); z-index: 0; }
+  .step { flex: 1; text-align: center; position: relative; z-index: 1; padding: 0 16px; }
+  .step-num { width: 72px; height: 72px; background: linear-gradient(135deg, var(--blue), var(--teal)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: white; margin: 0 auto 18px; box-shadow: 0 8px 24px rgba(37,99,235,0.3); }
+  .step h3 { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); margin-bottom: 8px; }
+  .step p { font-size: 0.83rem; color: var(--gray-600); line-height: 1.6; }
+
+  /* DEMO GUIDE */
+  .demo-guide { background: linear-gradient(135deg, #0F172A, #1E3A8A); padding: 90px 5%; }
+  .demo-guide .section-title { color: white; }
+  .demo-guide .section-sub { color: #94A3B8; }
+  .demo-steps { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; margin-top: 50px; }
+  .demo-step { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 26px 20px; text-align: center; transition: all .3s; }
+  .demo-step:hover { background: rgba(255,255,255,0.11); transform: translateY(-4px); }
+  .demo-step-num { width: 44px; height: 44px; background: linear-gradient(135deg, #2563EB, #0891B2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.1rem; margin: 0 auto 16px; }
+  .demo-step-icon { font-size: 2rem; margin-bottom: 12px; }
+  .demo-step h3 { color: white; font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+  .demo-step p { color: #94A3B8; font-size: 0.82rem; line-height: 1.6; }
+  .demo-step .demo-msg { background: rgba(34,158,217,0.15); border: 1px solid rgba(34,158,217,0.3); color: #7DD3FC; font-size: 0.75rem; padding: 6px 12px; border-radius: 50px; margin-top: 12px; font-style: italic; }
+  .demo-cta { text-align: center; margin-top: 44px; }
+  .btn-tg-big { background: #229ED9; color: white; padding: 18px 40px; border-radius: 50px; font-weight: 800; font-size: 1.05rem; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: all .2s; border: none; cursor: pointer; }
+  .btn-tg-big:hover { background: #1a8abf; transform: translateY(-2px); box-shadow: 0 14px 32px rgba(34,158,217,0.4); }
+
+  /* SCREENSHOTS SECTION */
+  .screenshots { background: var(--gray-100); }
+  .screenshots .section-sub { max-width: 640px; }
+  .screens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 48px; }
+  .screen-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.08); transition: all .3s; }
+  .screen-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
+  .screen-label { padding: 14px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--gray-100); }
+  .screen-label-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .screen-label h4 { font-size: 0.88rem; font-weight: 700; color: var(--gray-900); }
+  .screen-label p { font-size: 0.75rem; color: var(--gray-600); }
+  .screen-img { width: 100%; display: block; }
+  .screen-img-placeholder { width: 100%; height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--gray-100); color: var(--gray-400); font-size: 0.85rem; gap: 8px; }
+  .screen-img-placeholder span { font-size: 2rem; }
+
+  /* CHAT SCREENSHOTS */
+  .chat-screens { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 0; }
+  .chat-screen { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+  .chat-screen-header { background: linear-gradient(135deg, #075E54, #128C7E); padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+  .chat-screen-header .avatar { width: 34px; height: 34px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  .chat-screen-header h4 { color: white; font-size: 0.85rem; font-weight: 700; }
+  .chat-screen-header p { color: rgba(255,255,255,0.7); font-size: 0.68rem; }
+
+  /* COMPARISON */
+  .compare { background: white; }
+  .compare-table { margin-top: 48px; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); border: 1px solid var(--gray-100); }
+  .compare-head { display: grid; grid-template-columns: 2fr 1fr 1fr; background: var(--gray-900); }
+  .compare-head div { padding: 16px 24px; font-weight: 700; font-size: 0.88rem; }
+  .compare-head div:first-child { color: var(--gray-400); }
+  .compare-head div:nth-child(2) { color: var(--gray-400); text-align: center; }
+  .compare-head div:nth-child(3) { color: #60A5FA; text-align: center; }
+  .compare-row { display: grid; grid-template-columns: 2fr 1fr 1fr; border-bottom: 1px solid var(--gray-100); align-items: center; }
+  .compare-row:last-child { border: none; }
+  .compare-row div { padding: 14px 24px; font-size: 0.88rem; }
+  .compare-row div:first-child { color: var(--gray-800); font-weight: 500; }
+  .compare-row div:nth-child(2) { text-align: center; color: #EF4444; }
+  .compare-row div:nth-child(3) { text-align: center; color: var(--green); font-weight: 600; }
+  .compare-row:nth-child(even) { background: #F8FAFF; }
+
+  /* TESTIMONIALS */
+  .testimonials { background: var(--gray-100); }
+  .test-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin-top: 48px; }
+  .test-card { background: white; border-radius: 20px; padding: 26px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
+  .stars { color: #F59E0B; font-size: 1rem; margin-bottom: 12px; }
+  .test-card p { font-size: 0.88rem; color: var(--gray-800); line-height: 1.7; font-style: italic; margin-bottom: 18px; }
+  .test-author { display: flex; align-items: center; gap: 12px; }
+  .test-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+  .test-name { font-weight: 700; font-size: 0.86rem; color: var(--gray-900); }
+  .test-role { font-size: 0.76rem; color: var(--gray-600); }
+
+  /* CTA */
+  .cta-section { background: linear-gradient(135deg, #1E3A8A, #0E7490); padding: 90px 5%; text-align: center; }
+  .cta-section h2 { font-size: clamp(1.9rem, 3.5vw, 2.8rem); font-weight: 900; color: white; margin-bottom: 14px; }
+  .cta-section p { font-size: 1.05rem; color: rgba(255,255,255,0.8); margin-bottom: 38px; }
+  .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-wa-big { background: var(--wa); color: white; padding: 16px 34px; border-radius: 50px; font-weight: 700; font-size: 1rem; text-decoration: none; display: inline-flex; align-items: center; gap: 9px; transition: all .2s; }
+  .btn-wa-big:hover { background: var(--wa-dark); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(37,211,102,0.4); }
+  .btn-outline-w { background: transparent; color: white; padding: 16px 34px; border-radius: 50px; font-weight: 600; font-size: 1rem; border: 2px solid rgba(255,255,255,0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 9px; transition: all .2s; }
+  .btn-outline-w:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+  /* FOOTER */
+  footer { background: var(--gray-900); padding: 36px 5%; text-align: center; }
+  footer p { color: var(--gray-600); font-size: 0.82rem; }
+  footer span { color: var(--blue); font-weight: 700; }
+
+  /* FLOAT WA */
+  .float-wa {
+    position: fixed; bottom: 28px; right: 28px; z-index: 200;
+    background: var(--wa); color: white; border-radius: 50px;
+    padding: 14px 22px; font-weight: 700; font-size: 0.9rem;
+    box-shadow: 0 8px 24px rgba(37,211,102,0.4);
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; transition: all .2s;
+    animation: bounceIn 1s ease 2.5s both;
+  }
+  @keyframes bounceIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .float-wa:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(37,211,102,0.5); background: var(--wa-dark); }
+
+  /* MOBILE */
+  @media(max-width:900px){
+    .hero-grid{grid-template-columns:1fr}.phone-wrap{display:none}
+    .pain-grid,.features-grid,.test-grid,.demo-steps,.screens-grid,.chat-screens{grid-template-columns:1fr}
+    .steps{flex-direction:column;gap:28px}.steps::before{display:none}
+    .stats-inner{grid-template-columns:repeat(2,1fr)}
+    .compare-head div,.compare-row div{padding:10px 14px;font-size:0.8rem}
+    nav .nav-wa{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">🦷 Dentaklin<span> AI</span></a>
+  <div class="nav-links">
+    <a href="https://wa.me/593986456791?text=Hola%2C%20quiero%20más%20información%20sobre%20Dentaklin%20AI" target="_blank" class="nav-wa">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp
+    </a>
+    <a href="https://t.me/Dentaklin_bot" target="_blank" class="nav-cta">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      Demo en Telegram
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-badge"><span class="dot"></span> Disponible para WhatsApp y Telegram</div>
+      <h1>Tu clínica nunca deja de <em>agendar citas</em></h1>
+      <p>Un asistente con inteligencia artificial que responde, agenda y gestiona citas por <strong style="color:#25D366;">WhatsApp</strong> o <strong style="color:#60A5FA;">Telegram</strong> — automáticamente, incluso cuando tu equipo está descansando.</p>
+
+      <!-- PLATAFORMAS -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px;">
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.35);padding:8px 16px;border-radius:50px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          <span style="color:#25D366;font-weight:700;font-size:0.82rem;">WhatsApp</span>
+          <span style="background:#25D366;color:white;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:50px;">PRINCIPAL</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:rgba(34,158,217,0.15);border:1px solid rgba(34,158,217,0.35);padding:8px 16px;border-radius:50px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#229ED9"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          <span style="color:#229ED9;font-weight:700;font-size:0.82rem;">Telegram</span>
+          <span style="background:rgba(34,158,217,0.25);color:#7DD3FC;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:50px;">DEMO DISPONIBLE</span>
+        </div>
+      </div>
+
+      <div class="hero-btns">
+        <a href="https://wa.me/593986456791?text=Hola%2C%20quiero%20información%20sobre%20el%20bot%20para%20mi%20clínica" target="_blank" class="btn-tg" style="background:var(--wa);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Quiero esto para mi clínica
+        </a>
+        <a href="#demo-guide" class="btn-scroll">Ver demo en Telegram ↓</a>
+      </div>
+    </div>
+
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-header">
+            <div class="phone-avatar">🦷</div>
+            <div class="phone-info">
+              <h4>Dentaklin Bot</h4>
+              <p>En línea ahora</p>
+            </div>
+            <div class="phone-status"></div>
+          </div>
+          <div class="chat-body">
+            <div class="msg bot">¡Hola! 😊 Soy el asistente de <b>Dentaklin</b>. ¿En qué te ayudo?<div class="msg-time">09:00 ✓✓</div></div>
+            <div class="msg user">Quiero agendar una cita<div class="msg-time">09:01 ✓✓</div></div>
+            <div class="msg bot">¡Perfecto! 🗓️ Disponibilidad para <b>hoy</b>:<br>· 10:00 · 10:30 · 11:00 · 14:00 · 15:30<br>¿Cuál te conviene?<div class="msg-time">09:01 ✓✓</div></div>
+            <div class="msg user">A las 10:30 por favor<div class="msg-time">09:01 ✓✓</div></div>
+            <div class="msg bot">✅ ¡Listo! Cita a las <b>10:30 AM</b>. ¡Te esperamos! 😊<div class="msg-time">09:02 ✓✓</div></div>
+            <div class="msg bot">📅 Agregado a calendario automáticamente.<div class="msg-time">09:02 ✓✓</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stats-inner">
+    <div><div class="stat-num">24/7</div><div class="stat-label">Disponible sin descanso</div></div>
+    <div><div class="stat-num">&lt; 3s</div><div class="stat-label">Tiempo de respuesta</div></div>
+    <div><div class="stat-num" style="font-size:1.8rem;">📱+💬</div><div class="stat-label">WhatsApp & Telegram</div></div>
+    <div><div class="stat-num">100%</div><div class="stat-label">Automatizado</div></div>
+  </div>
+</div>
+
+<!-- PAIN -->
+<section class="pain">
+  <div class="section-inner">
+    <div class="tag" style="background:rgba(239,68,68,0.15);color:#FCA5A5;">El problema actual</div>
+    <h2 class="section-title">Tu clínica pierde pacientes todos los días</h2>
+    <p class="section-sub">¿Cuántas citas se van porque no puedes responder a tiempo?</p>
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">😴</div>
+        <h3>Fuera de horario = Sin cita</h3>
+        <p>Un paciente escribe a las 9 PM. No hay quien responda. Al día siguiente ya agendó con otra clínica.</p>
+        <span class="badge-bad">❌ Paciente perdido</span>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">📱</div>
+        <h3>Recepcionista saturada</h3>
+        <p>Tu equipo pasa horas respondiendo lo mismo: horarios, precios, disponibilidad — tiempo que podrían usar mejor.</p>
+        <span class="badge-bad">❌ Tiempo desperdiciado</span>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">📋</div>
+        <h3>Agenda desorganizada</h3>
+        <p>Citas en WhatsApp, en papel, en el calendario... Errores, solapamientos y pacientes sin confirmación.</p>
+        <span class="badge-bad">❌ Citas duplicadas</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="section-inner">
+    <div class="tag">La solución</div>
+    <h2 class="section-title">Todo lo que hace Dentaklin AI</h2>
+    <p class="section-sub">Un sistema completo que automatiza la gestión de citas de principio a fin.</p>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon blue">🤖</div>
+        <h3>IA Conversacional Natural</h3>
+        <p>El bot entiende lenguaje natural por <strong>WhatsApp o Telegram</strong>. El paciente escribe como habla y el asistente responde con empatía, como un humano.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon teal">🗓️</div>
+        <h3>Agenda en Google Calendar</h3>
+        <p>Cada cita se registra automáticamente con nombre, teléfono, tratamiento y canal. Sin duplicados.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon green">✅</div>
+        <h3>Verificación Anti-Duplicados</h3>
+        <p>Si el paciente ya tiene una cita activa, el bot lo detecta y ofrece reagendar en lugar de crear un conflicto.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon purple">📊</div>
+        <h3>CRM Automático en Sheets</h3>
+        <p>Cada paciente queda registrado en Google Sheets: nombre, teléfono, tratamiento, estado y fecha. Tu base de datos siempre actualizada.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon orange">🔔</div>
+        <h3>Notificaciones al Instante</h3>
+        <p>Cada vez que se agenda una cita, recibes una notificación en Telegram con todos los datos del paciente.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon pink">🔄</div>
+        <h3>Reagendar y Cancelar</h3>
+        <p>El paciente puede reagendar o cancelar su cita conversando con el bot. El sistema lo actualiza todo automáticamente.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="section-inner">
+    <div class="tag">Paso a paso</div>
+    <h2 class="section-title">Así de simple funciona</h2>
+    <p class="section-sub">El paciente no aprende nada nuevo. Solo escribe como lo haría a cualquier persona.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">💬</div>
+        <h3>Paciente escribe</h3>
+        <p>Manda un mensaje por Telegram pidiendo disponibilidad o queriendo agendar.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">🧠</div>
+        <h3>IA procesa</h3>
+        <p>El asistente consulta disponibilidad en tiempo real y valida el horario elegido.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">📅</div>
+        <h3>Cita creada</h3>
+        <p>Se agenda en Google Calendar, se guarda en Sheets y tú recibes una notificación.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">🎉</div>
+        <h3>Paciente confirmado</h3>
+        <p>El paciente recibe confirmación con fecha, hora y tratamiento. Sin intervención humana.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO GUIDE -->
+<section class="demo-guide" id="demo-guide">
+  <div class="section-inner">
+    <div class="tag" style="background:rgba(34,158,217,0.2);color:#7DD3FC;">🤖 Demo en Telegram · Funciona igual en WhatsApp</div>
+    <h2 class="section-title" style="color:white;">Pruébalo en 60 segundos</h2>
+    <p class="section-sub">Tenemos una demo activa en Telegram para que veas exactamente cómo funciona. Tu clínica lo tendría en <strong style="color:#25D366;">WhatsApp</strong> — la experiencia del paciente es idéntica.</p>
+
+    <!-- AVISO PLATAFORMAS -->
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin:28px 0 0;">
+      <div style="flex:1;min-width:220px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:16px;padding:18px 20px;display:flex;gap:14px;align-items:flex-start;">
+        <span style="font-size:1.6rem;">✅</span>
+        <div>
+          <div style="color:#34D399;font-weight:800;font-size:0.9rem;margin-bottom:4px;">Tu clínica → WhatsApp</div>
+          <div style="color:#94A3B8;font-size:0.82rem;line-height:1.5;">El bot que instalaríamos en tu clínica atiende directamente por WhatsApp — donde ya están tus pacientes.</div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:220px;background:rgba(34,158,217,0.1);border:1px solid rgba(34,158,217,0.3);border-radius:16px;padding:18px 20px;display:flex;gap:14px;align-items:flex-start;">
+        <span style="font-size:1.6rem;">🧪</span>
+        <div>
+          <div style="color:#7DD3FC;font-weight:800;font-size:0.9rem;margin-bottom:4px;">Demo de prueba → Telegram</div>
+          <div style="color:#94A3B8;font-size:0.82rem;line-height:1.5;">Para probar el sistema ahora mismo, usa nuestro bot en Telegram. Misma IA, mismo flujo, mismas funciones.</div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-steps">
+      <div class="demo-step">
+        <div class="demo-step-num">1</div>
+        <div class="demo-step-icon">📲</div>
+        <h3>Abre el bot</h3>
+        <p>Haz clic en el botón de abajo para abrir el chat en Telegram. No necesitas instalar nada.</p>
+        <div class="demo-msg">"Pulsa el botón azul"</div>
+      </div>
+      <div class="demo-step">
+        <div class="demo-step-num">2</div>
+        <div class="demo-step-icon">👋</div>
+        <h3>Di hola</h3>
+        <p>Escribe "Hola" o "Quiero información" — el bot te responde en segundos.</p>
+        <div class="demo-msg">"Hola, quiero info"</div>
+      </div>
+      <div class="demo-step">
+        <div class="demo-step-num">3</div>
+        <div class="demo-step-icon">🗓️</div>
+        <h3>Pide disponibilidad</h3>
+        <p>Escribe "¿Qué horarios tienen para hoy?" y verás los turnos disponibles en tiempo real.</p>
+        <div class="demo-msg">"¿Tienen citas para hoy?"</div>
+      </div>
+      <div class="demo-step">
+        <div class="demo-step-num">4</div>
+        <div class="demo-step-icon">✅</div>
+        <h3>Agenda tu cita</h3>
+        <p>Elige un horario, da tu nombre y teléfono. ¡Listo! La cita se crea en segundos.</p>
+        <div class="demo-msg">"Me quedo con las 10:30"</div>
+      </div>
+    </div>
+    <div class="demo-cta">
+      <a href="https://t.me/Dentaklin_bot" target="_blank" class="btn-tg-big">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        Abrir @Dentaklin_bot en Telegram
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- SCREENSHOTS -->
+<section class="screenshots">
+  <div class="section-inner">
+    <div class="tag">Resultados reales</div>
+    <h2 class="section-title">Así se ve tu clínica digitalizada</h2>
+    <p class="section-sub">Cada cita queda registrada automáticamente en tu calendario y en tu base de datos. Sin esfuerzo, sin errores.</p>
+    <div class="screens-grid" style="margin-top:48px;">
+      <div class="screen-card">
+        <div class="screen-label">
+          <div class="screen-label-dot" style="background:#34A853;"></div>
+          <div>
+            <h4>📊 CRM en Google Sheets</h4>
+            <p>Todos los pacientes registrados automáticamente</p>
+          </div>
+        </div>
+        <img src="img/sheets.jpg" alt="CRM Dentaklin en Google Sheets" class="screen-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="screen-img-placeholder" style="display:none"><span>📊</span>imagen no encontrada</div>
+      </div>
+      <div class="screen-card">
+        <div class="screen-label">
+          <div class="screen-label-dot" style="background:#4285F4;"></div>
+          <div>
+            <h4>📅 Google Calendar</h4>
+            <p>Citas con todos los detalles del paciente</p>
+          </div>
+        </div>
+        <img src="img/calendar.jpg" alt="Google Calendar con citas Dentaklin" class="screen-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="screen-img-placeholder" style="display:none"><span>📅</span>imagen no encontrada</div>
+      </div>
+    </div>
+
+    <!-- CHAT SCREENSHOTS -->
+    <div style="margin-top:24px;">
+      <p style="font-size:0.9rem;color:var(--gray-600);margin-bottom:16px;font-weight:600;">💬 Conversaciones reales con el bot:</p>
+      <div class="chat-screens">
+        <div class="chat-screen">
+          <div class="chat-screen-header">
+            <div class="avatar">🦷</div>
+            <div>
+              <h4>Dentaklin Bot</h4>
+              <p>Consulta de precios y tratamientos</p>
+            </div>
+          </div>
+          <img src="img/chat1.jpg" alt="Chat Dentaklin - precios" class="screen-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="screen-img-placeholder" style="display:none"><span>💬</span>imagen no encontrada</div>
+        </div>
+        <div class="chat-screen">
+          <div class="chat-screen-header">
+            <div class="avatar">🦷</div>
+            <div>
+              <h4>Dentaklin Bot</h4>
+              <p>Reagendamiento automático de cita</p>
+            </div>
+          </div>
+          <img src="img/chat2.jpg" alt="Chat Dentaklin - reagendar" class="screen-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+          <div class="screen-img-placeholder" style="display:none"><span>💬</span>imagen no encontrada</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="compare">
+  <div class="section-inner">
+    <div class="tag">Comparativa</div>
+    <h2 class="section-title">Con vs. sin Dentaklin AI</h2>
+    <p class="section-sub">La diferencia es inmediata desde el primer día.</p>
+    <div class="compare-table">
+      <div class="compare-head">
+        <div>Situación</div>
+        <div>Sin el bot</div>
+        <div>✨ Con Dentaklin AI</div>
+      </div>
+      <div class="compare-row"><div>Atención fuera de horario</div><div>✗</div><div>✓ 24/7</div></div>
+      <div class="compare-row"><div>Tiempo de respuesta</div><div>Horas o días</div><div>✓ &lt; 3 segundos</div></div>
+      <div class="compare-row"><div>Registro automático en Sheets</div><div>✗</div><div>✓ Inmediato</div></div>
+      <div class="compare-row"><div>Agenda en Google Calendar</div><div>Manual</div><div>✓ Automático</div></div>
+      <div class="compare-row"><div>Notificación al dueño</div><div>✗</div><div>✓ En segundos</div></div>
+      <div class="compare-row"><div>Citas duplicadas</div><div>Frecuentes</div><div>✓ Imposibles</div></div>
+      <div class="compare-row"><div>Reagendar / Cancelar</div><div>Llamada manual</div><div>✓ Automático</div></div>
+      <div class="compare-row"><div>Carga de la recepción</div><div>Alta</div><div>✓ Reducida al mínimo</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="section-inner">
+    <div class="tag">Lo que dicen</div>
+    <h2 class="section-title">Dentistas que ya lo usan</h2>
+    <p class="section-sub">Resultados reales desde el primer día de implementación.</p>
+    <div class="test-grid">
+      <div class="test-card">
+        <div class="stars">★★★★★</div>
+        <p>"Antes perdía pacientes porque no podía responder de noche. Ahora el bot agenda solo y yo veo las notificaciones al despertar. Increíble."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:#DBEAFE;">👨‍⚕️</div>
+          <div><div class="test-name">Dr. Carlos M.</div><div class="test-role">Odontólogo General · Quito</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="stars">★★★★★</div>
+        <p>"Mi recepcionista ya no pasa el día respondiendo mensajes. Ahora tiene tiempo para atender mejor a los pacientes que llegan en persona."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:#D1FAE5;">👩‍⚕️</div>
+          <div><div class="test-name">Dra. Ana P.</div><div class="test-role">Clínica Dental · Guayaquil</div></div>
+        </div>
+      </div>
+      <div class="test-card">
+        <div class="stars">★★★★★</div>
+        <p>"La agenda siempre era un caos. Ahora todo está en Google Calendar perfectamente organizado. No cambiaría esto por nada."</p>
+        <div class="test-author">
+          <div class="test-avatar" style="background:#EDE9FE;">🦷</div>
+          <div><div class="test-name">Dr. Miguel R.</div><div class="test-role">Ortodoncista · Cuenca</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <h2>¿Listo para automatizar tu clínica? 🦷</h2>
+  <p>Configuración en menos de 24 horas. Sin tecnicismos, sin complicaciones.</p>
+  <div class="cta-btns">
+    <a href="https://wa.me/593986456791?text=Hola%20Jostin%2C%20quiero%20información%20sobre%20Dentaklin%20AI%20para%20mi%20clínica" target="_blank" class="btn-wa-big">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Contactar por WhatsApp
+    </a>
+    <a href="https://t.me/Dentaklin_bot" target="_blank" class="btn-outline-w">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      Probar Demo Gratis
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 <span>Dentaklin AI</span> — Automatización inteligente para clínicas dentales · Desarrollado con ❤️ en Ecuador</p>
+</footer>
+
+<!-- FLOAT WA -->
+<a href="https://wa.me/593986456791?text=Hola%20Jostin%2C%20quiero%20información%20sobre%20Dentaklin%20AI" target="_blank" class="float-wa">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  💬 WhatsApp
+</a>
+
+</body>
+</html>
